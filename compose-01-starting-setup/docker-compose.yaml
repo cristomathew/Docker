@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=max
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    networks:
+      - goals-network
+    container_name: mongodb
+  backend:
+    build: ./backend
+    # build: 
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     somearg: 1
+    ports:
+      - '80:80'
+    networks:
+      - goals-network
+    volumes:
+      - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+    
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    networks:
+      - goals-network
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+volumes:
+  data:
+  logs:
+
+networks:
+  goals-network:
+    external: true

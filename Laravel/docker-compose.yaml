@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  server:
+    image: 'nginx:stable-alpine'
+    ports:
+      - '8000:80'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    container_name: nginx
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+    # ports:
+    #   - '3000:9000'
+  mysql:
+    image: mysql:5.7
+    env_file:
+      - ./env/mysql.env
+  composer:
+    build:
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+  # artisan:
+  # npm:
+
+
+#note name matters here as php name is used in nginx.conf
+#port is disbaled for php as nginx will talk directly to container rather than from local host although from local host should also work fine
